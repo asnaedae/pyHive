@@ -1,0 +1,12 @@
+---
+  # username/password to access hivehome
+  username: user@example.com
+  password: ThisIsYourPassword
+  # just in case we need to change the URL to access Hive
+  baseURL: https://my.hivehome.com
+  # EMON CMS API Key (look up via your user profile)
+  emoncms_api_key: EMON_CMS_API_KEY
+  # EMON CMS POST API
+  emoncms_api_url: http://emoncms.org/input/post.json
+  # Choose a NodeID to input data as
+  nodeID: 1
