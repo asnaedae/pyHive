@@ -34,7 +34,7 @@ if __name__ == '__main__':
         print("Login succeeded")
 
     try:
-        weather = session.get(config['baseURL'] + '/myhive/weather', headers=headers)
+        weather = session.get(config['baseURL'] + '/weather', headers=headers)
         weather.raise_for_status()
         j = json.loads(weather.text)
         status['forecast'] = j['outside']
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
     try:
-        hotwater = session.get(config['baseURL'] + '/myhive/hotwater/schedule', headers=headers)
+        hotwater = session.get(config['baseURL'] + '/hotwater/schedule', headers=headers)
         j = json.loads(hotwater.text)
         if (j['current'] == 'OFF'):
             status['hotwater'] = 0
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
     try:
-        heating = session.get(config['baseURL'] + '/myhive/heating/target', headers=headers)
+        heating = session.get(config['baseURL'] + '/heating/target', headers=headers)
         j = json.loads(heating.text)
         status['target'] = j['target']
         if args.verbose:
