@@ -34,22 +34,43 @@ if __name__ == '__main__':
         print("Login succeeded")
 
     try:
-        weather = session.get(config['baseURL'] + '/weather', headers=headers)
+        weather = session.get(config['baseURL'] + '/users/' + config['username'] + '/widgets/temperature', headers=headers)
         weather.raise_for_status()
         j = json.loads(weather.text)
-        status['forecast'] = j['outside']
-        status['temperature'] = j['inside']
-        status['weather'] = j['weather']
+        status['forecast'] = j['outside']['now']
+        status['temperature'] = j['inside']['now']
+        status['weather'] = j['outside']['weather']['description']
         if args.verbose:
-            print("Current Temp: %d Outside: %d Weather: %s" % (status[u'temperature'], status[u'forecast'], status[u'weather'] ))
+            print("Current Temp: %s Outside: %d Weather: %s" % (status[u'temperature'], status[u'forecast'], status[u'weather'] ))
     except requests.exceptions.HTTPError as error:
         status_code = weather.status_code
         sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
     try:
-        hotwater = session.get(config['baseURL'] + '/hotwater/schedule', headers=headers)
+        url = config['baseURL'] + '/users/' + config['username'] + '/hubs'
+        hubs = session.get(url, headers=headers)
+        hubs.raise_for_status()
+        j = json.loads(hubs.text)
+        hub_id = j[0]['id']
+    except requests.exceptions.HTTPError as error:
+        status_code = hubs.status_code
+        sys.exit( "Requests to Hive failed: %s" % (status_code) )
+
+    # now we have captured the hub ID, look for the hotwater controller
+    try:
+        url = config['baseURL'] + '/users/' + config['username'] + '/hubs/' + hub_id + '/devices/hotwatercontroller'
+        controller = session.get(url, headers=headers)
+        j = json.loads(controller.text)
+
+        for x in j:
+            if x['name'] == 'Your Receiver':
+                controller_id = x['id']
+
+        url += '/' + controller_id + '/controls/schedule'
+
+        hotwater = session.get(url, headers=headers)
         j = json.loads(hotwater.text)
-        if (j['current'] == 'OFF'):
+        if (j['current']['op'] == 'OFF'):
             status['hotwater'] = 0
         else:
             status['hotwater'] = 1
@@ -59,10 +80,12 @@ if __name__ == '__main__':
         status_code = hotwater.status_code
         sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
+
     try:
-        heating = session.get(config['baseURL'] + '/heating/target', headers=headers)
+        url = config['baseURL'] + '/users/' + config['username'] + '/widgets/climate/targetTemperature?precision=0.5'
+        heating = session.get(url, headers=headers)
         j = json.loads(heating.text)
-        status['target'] = j['target']
+        status['target'] = j['temperature']
         if args.verbose:
             print("Target Temperature: %d" % (status[u'target']))
     except requests.exceptions.HTTPError as error:
