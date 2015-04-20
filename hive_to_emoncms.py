@@ -56,29 +56,30 @@ if __name__ == '__main__':
         status_code = hubs.status_code
         sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
-    # now we have captured the hub ID, look for the hotwater controller
-    try:
-        url = config['baseURL'] + '/users/' + config['username'] + '/hubs/' + hub_id + '/devices/hotwatercontroller'
-        controller = session.get(url, headers=headers)
-        j = json.loads(controller.text)
-
-        for x in j:
-            if x['name'] == 'Your Receiver':
-                controller_id = x['id']
-
-        url += '/' + controller_id + '/controls/schedule'
-
-        hotwater = session.get(url, headers=headers)
-        j = json.loads(hotwater.text)
-        if (j['current']['op'] == 'OFF'):
-            status['hotwater'] = 0
-        else:
-            status['hotwater'] = 1
-        if args.verbose:
-            print("Hot Water Status: %d" % (status[u'hotwater']))
-    except requests.exceptions.HTTPError as error:
-        status_code = hotwater.status_code
-        sys.exit( "Requests to Hive failed: %s" % (status_code) )
+    status['hotwater'] = 0
+#    # now we have captured the hub ID, look for the hotwater controller
+#    try:
+#        url = config['baseURL'] + '/users/' + config['username'] + '/hubs/' + hub_id + '/devices/hotwatercontroller'
+#        controller = session.get(url, headers=headers)
+#        j = json.loads(controller.text)
+#
+#        for x in j:
+#            if x['name'] == 'Your Receiver':
+#                controller_id = x['id']
+#
+#        url += '/' + controller_id + '/controls/schedule'
+#
+#        hotwater = session.get(url, headers=headers)
+#        j = json.loads(hotwater.text)
+#        if (j['current']['op'] == 'OFF'):
+#            status['hotwater'] = 0
+#        else:
+#            status['hotwater'] = 1
+#        if args.verbose:
+#            print("Hot Water Status: %d" % (status[u'hotwater']))
+#    except requests.exceptions.HTTPError as error:
+#        status_code = hotwater.status_code
+#        sys.exit( "Requests to Hive failed: %s" % (status_code) )
 
 
     try:
